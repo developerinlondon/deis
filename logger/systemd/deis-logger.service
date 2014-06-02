@@ -1,5 +1,7 @@
 [Unit]
 Description=deis-logger
+Requires=deis-logger-data.service
+After=deis-logger-data.service
 
 [Service]
 EnvironmentFile=/etc/environment
@@ -12,3 +14,6 @@ ExecStop=/usr/bin/docker rm -f deis-logger
 
 [Install]
 WantedBy=multi-user.target
+
+[X-Fleet]
+X-ConditionMachineOf=deis-logger-data.service

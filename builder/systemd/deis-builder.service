@@ -1,5 +1,7 @@
 [Unit]
 Description=deis-builder
+Requires=deis-builder-data.service
+After=deis-builder-data.service
 
 [Service]
 EnvironmentFile=/etc/environment
@@ -13,3 +15,6 @@ ExecStop=/usr/bin/docker rm -f deis-builder
 
 [Install]
 WantedBy=multi-user.target
+
+[X-Fleet]
+X-ConditionMachineOf=deis-builder-data.service
