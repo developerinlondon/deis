@@ -8,9 +8,6 @@ RUN wget --quiet --no-check-certificate -O - https://www.postgresql.org/media/ke
 RUN apt-get update
 RUN apt-get install -yq postgresql-9.3 && /etc/init.d/postgresql stop
 
-# debug to remove
-RUN apt-get install -yq curl
-
 # add the current build context to /app
 ADD . /app
 
