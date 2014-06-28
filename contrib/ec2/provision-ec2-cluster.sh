@@ -5,10 +5,18 @@
 
 set -e
 
+###############
+#### Variables
+###############
+DISCOVERY_URL="/tmp/discoveryurl.txt"
 THIS_DIR=$(cd $(dirname $0); pwd) # absolute path
 CONTRIB_DIR=$(dirname $THIS_DIR)
 
 source $CONTRIB_DIR/utils.sh
+
+##################
+#### Check prereqs
+##################
 
 # check for EC2 API tools in $PATH
 if ! which aws > /dev/null; then
@@ -20,14 +28,30 @@ if [ -z "$DEIS_NUM_INSTANCES" ]; then
     DEIS_NUM_INSTANCES=3
 fi
 
+###############
+#### User-Data
+###############
+
+# get discovery URL
+wget -q --output-document ${DISCOVERY_URL} https://discovery.etcd.io/new
+# add to user-data file
+sed -i "8i\    discovery: $(cat ${DISCOVERY_URL})" ${CONTRIB_DIR}/coreos/user-data
 # check that the CoreOS user-data file is valid
 $CONTRIB_DIR/util/check-user-data.sh
+
+###############
+#### Create AWS
+###############
 
 # create an EC2 cloudformation stack based on CoreOS's default template
 aws cloudformation create-stack \
     --template-body "$(./gen-json.py)" \
     --stack-name deis \
     --parameters "$(<cloudformation.json)"
+
+#################
+#### Confirmation
+#################
 
 echo_green "Your Deis cluster has successfully deployed to AWS CloudFormation."
 echo_green "Please continue to follow the instructions in the README."
