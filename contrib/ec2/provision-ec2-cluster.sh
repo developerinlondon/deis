@@ -32,16 +32,21 @@ fi
 #### User-Data
 ###############
 
+DISCOVERY_URL=$(curl -s https://discovery.etcd.io/new)
+USER_DATA=$CONTRIB_DIR/coreos/user-data
 # if its darwin (osx), (install and) use gnu sed
 if [[ `uname` == 'Darwin' ]]; then
   if [[ `brew info gnu-sed | awk 'NR == 3'` == 'Not installed' ]]; then
     brew install gnu-sed --default-names
   fi
-  SED_EXEC="/usr/local/opt/gnu-sed/bin/sed"
+  /usr/local/opt/gnu-sed/bin/sed  -i "8i\    discovery: ${DISCOVERY_URL}" ${USER_DATA}
 else
-  SED_EXEC="sed"
+  sed  -i "8i\    discovery: ${DISCOVERY_URL}" ${USER_DATA}
 fi
-exec $SED_EXEC -i "8i\    discovery: $(curl -s https://discovery.etcd.io/new)" ${CONTRIB_DIR}/coreos/user-data
+echo_green "discovery URL configured"
+
+# check that the CoreOS user-data file is valid
+$CONTRIB_DIR/util/check-user-data.sh
 
 ###############
 #### Create AWS
