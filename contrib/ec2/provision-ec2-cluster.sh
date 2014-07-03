@@ -8,7 +8,6 @@ set -e
 ###############
 #### Variables
 ###############
-DISCOVERY_URL="/tmp/discoveryurl.txt"
 THIS_DIR=$(cd $(dirname $0); pwd) # absolute path
 CONTRIB_DIR=$(dirname $THIS_DIR)
 
@@ -36,10 +35,7 @@ DISCOVERY_URL=$(curl -s https://discovery.etcd.io/new)
 USER_DATA=$CONTRIB_DIR/coreos/user-data
 # if its darwin (osx), (install and) use gnu sed
 if [[ `uname` == 'Darwin' ]]; then
-  if [[ `brew info gnu-sed | awk 'NR == 3'` == 'Not installed' ]]; then
-    brew install gnu-sed --default-names
-  fi
-  /usr/local/opt/gnu-sed/bin/sed  -i "8i\    discovery: ${DISCOVERY_URL}" ${USER_DATA}
+  sed  -s "8i\    discovery: ${DISCOVERY_URL}" ${USER_DATA}
 else
   sed  -i "8i\    discovery: ${DISCOVERY_URL}" ${USER_DATA}
 fi
