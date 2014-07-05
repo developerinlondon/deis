@@ -18,6 +18,9 @@ RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 36A1D7869245C8950F9
 RUN apt-get update -qy
 RUN apt-get install -yq lxc-docker-1.0.0
 
+# 60 seconds ssh keepalive, so any intermediary firewalls/loadbalancers dont drop the connection.
+RUN echo ClientAliveInterval 60 >> /etc/ssh/sshd_config
+
 # install recent pip
 RUN wget -qO- https://raw.githubusercontent.com/pypa/pip/1.5.5/contrib/get-pip.py | python -
 
