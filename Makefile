@@ -20,8 +20,8 @@ define deis_units
 endef
 
 # TODO: re-evaluate the fragile start order
-COMPONENTS=builder cache controller database logger registry
-ALL_COMPONENTS=$(COMPONENTS) router
+COMPONENTS=builder cache controller database logger registry 
+ALL_COMPONENTS=$(COMPONENTS) router cadvisor
 START_COMPONENTS=registry logger cache database
 
 ALL_UNITS = $(foreach C,$(COMPONENTS),$(wildcard $(C)/systemd/*))
@@ -49,6 +49,14 @@ install-routers: check-fleet
 		$(FLEETCTL) load ./$(R) ; \
 		rm -f ./$(R) ; \
 	)
+
+install-cadvisor: check-fleet
+        @$(foreach R, $(CADVISOR_UNITS), \
+                cp cadvisor/systemd/deis-cadvisor.service ./$(R) ; \
+                $(FLEETCTL) load ./$(R) ; \
+                rm -f ./$(R) ; \
+        )
+
 
 pull:
 	$(call ssh_all,'for c in $(ALL_COMPONENTS); do docker pull deis/$$c:latest; done')
@@ -108,6 +116,19 @@ start-routers: check-fleet start-warning
 			sleep 8; \
 		done
 	$(call check_for_errors)
+
+start-cadvisor: check-fleet start-warning
+        $(call echo_yellow,"Waiting for 1 of $(DEIS_NUM_INSTANCES) deis-advisor to start...")
+        $(foreach R,$(CADVISOR_UNITS),$(FLEETCTL) start -no-block $(R);)
+        @until $(FLEETCTL) list-units | egrep -q "deis-cadvisor.+(running)"; \
+                do sleep 2; \
+                        printf "\033[0;33mStatus:\033[0m "; $(FLEETCTL) list-units | \
+                        grep "deis-cadvisor" | head -n 1 | \
+                        awk '{printf "%-10s (%s)    \r", $$4, $$5}'; \
+                        sleep 8; \
+                done
+        $(call check_for_errors)
+
 
 start-warning:
 	$(call echo_cyan,"Deis components may take a long time to start the first time they are initialized.")

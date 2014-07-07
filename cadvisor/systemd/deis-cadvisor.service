@@ -1,0 +1,15 @@
+[Unit]
+Description=deis-cadvisor
+
+[Service]
+EnvironmentFile=/etc/environment
+TimeoutStartSec=20m
+ExecStartPre=/bin/sh -c "IMAGE=`/run/deis/bin/get_image /deis/cadvisor`; docker history $IMAGE >/dev/null || docker pull $IMAGE"
+ExecStartPre=/bin/sh -c "docker inspect deis-cadvisor >/dev/null && docker rm -f deis-cadvisor || true"
+ExecStart=/bin/sh -c "IMAGE=`/run/deis/bin/get_image /deis/cadvisor` && docker run --name deis-cadvisor --rm -p 80:8080 -p 2222:2222 --volume=/var/run:/var/run:rw --volume=/sys/fs/cgroup/:/sys/fs/cgroup:ro --volume=/var/lib/docker/:/var/lib/docker:ro --detach=true -e PUBLISH=80 -e HOST=$COREOS_PRIVATE_IPV4 $IMAGE"
+
+[Install]
+WantedBy=multi-user.target
+
+[X-Fleet]
+X-Conflicts=deis-cadvisor.*.service
