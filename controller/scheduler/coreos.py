@@ -59,9 +59,9 @@ class FleetClient(object):
 
         # only announce web and cmd processes
         if command.lower() in ['web', 'cmd']:
-          self._create_announcer(name, image, command, ANNOUNCE_TEMPLATE, env)
+            self._create_announcer(name, image, command, ANNOUNCE_TEMPLATE, env)
         else:
-          logger.info '-- skipping announcer for '+name+ '('+command+')'
+            logger.info '-- skipping announcer for '+name+ '('+command+')'
 
     def _create_container(self, name, image, command, template, env):
         l = locals().copy()
