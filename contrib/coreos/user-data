@@ -8,6 +8,20 @@ coreos:
     addr: $private_ipv4:4001
     peer-addr: $private_ipv4:7001
   units:
+  - name: docker-1.1.0.service
+  command: start
+  content: |
+    [Unit]
+    Description=patch /usr/bin/docker with docker 1.1.0
+
+    [Service]
+    Type=oneshot
+    ExecStart=/usr/bin/wget --no-check-certificate -q -O /home/core/docker.1.1.0 https://get.docker.io/builds/Linux/x86_64/docker-latest
+    ExecStartPost=/bin/chmod 0755 /home/core/docker-latest
+    ExecStartPost=/bin/mount --bind /home/core/docker-latest /usr/bin/docker
+
+    [Install]
+    WantedBy=multi-user.target
   - name: docker.service
     content: |
       [Unit]
