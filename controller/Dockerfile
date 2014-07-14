@@ -27,8 +27,13 @@ RUN mkdir -p /templates && chown -R deis:deis /templates
 # create directory for logs
 RUN mkdir -p /var/log/deis && chown -R deis:deis /var/log/deis
 
+# Add supervisord in order to start the services
+RUN apt-get install -y supervisor && mkdir -p /var/log/supervisor
+ADD supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
 # define execution environment
-CMD ["/app/bin/boot"]
+# CMD ["/app/bin/boot"]
+CMD ["/usr/bin/supervisord", "-n"]
 EXPOSE 8000
 
 # define work environment
